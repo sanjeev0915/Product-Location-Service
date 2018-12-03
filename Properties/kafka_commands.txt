@@ -1,0 +1,127 @@
+kafka connect
+
+ CLASSPATH of the Kafka Connect process
+
+kafka connect jdbc jar path
+
+/downloads/confluent-5.0.0/sahre/java/kafka-connect-jdbc/*.jar
+copied to /users/sanjeev/kafka/share/java/kafka-connect-jdbc/
+
+oracle jdbc jar path
+~/downloads/ojdbc8-Full/ojdbc8.jar
+
+* Download the Oracle JDBC driver and add the .jar to your kafka jdbc dir (mine is here confluent-3.2.0/share/java/kafka-connect-jdbc/ojdbc8.jar)
+* Create a properties file for the source connector (mine is here confluent-3.2.0/etc/kafka-connect-jdbc/source-quickstart-oracle.properties). Notice the Oracle table name and columns are in ALL Caps
+
+include the Oracle JDBC driver in the CLASSPATH
+
+run kafka connect in standalone or distributed mode
+
+command to run kafka-connect in standalone mode
+
+~/kafka/bin/connect-standalone.sh  <path-to-the-properties-file>
+~/kafka/bin/connect-standalone.sh  ~/kafka/config/connect-file-source oracle.properties
+~/kafka/bin/connect-standalone.sh   ~/path/to/connect-avro-standalone.properties    ~/kafka/config/connect-file-source-oracle.properties
+
+
+kafka-connect-avro-converter - jar file name is kafka-connect-avro-converter-5.0.0.jar in  /share/java/kafka-connect-storage-common
+
+org.apache.kafka.connect.json.JsonConverter
+
+/share/java/kafka/connect-json-2.0.0-cp1.jar
+
+
+To run kafka connect with AVRo Serialisation - use the properties file - connect-avro-standalone.properties
+
+tasks.max // maximum number of tasks to run for this connector instance
+
+============
+
+Start zookeeper
+using the ports 2181, 2182, 2183
+
+cd ~/zookeeper
+./start_zk.sh
+
+./bin/zkServer.sh start zoo1.cfg
+./bin/zkServer.sh start zoo2.cfg
+./bin/zkServer.sh start zoo3.cfg
+
+Start Kafka cluster
+
+using the ports 9092, 9093, 9094
+./bin/kafka-server-start.sh ./config/server1.properties &
+./bin/kafka-server-start.sh ./config/server12properties &
+./bin/kafka-server-start.sh ./config/server3.properties &
+
+kafka data directories
+
+log.dirs=/users/sanjeev/kafka/tmp/kafka-logs1
+log.dirs=/users/sanjeev/kafka/tmp/kafka-logs2
+log.dirs=/users/sanjeev/kafka/tmp/kafka-logs3
+
+start schema-registry from confluent directory
+cd ~/downloads/confluent-5.0.0
+./bin/schema-registry-start ./etc/schema-registry/schema-registry.properties
+
+running on port 8081
+
+start oracle db using virtual box
+start virtual box
+start oracle DB developer VM
+will run-on port 0:0:0:0:1521
+user: system, password: oracle, service id: orcl
+
+start kafka connect
+cd ~/kafka
+./bin/connect-standalone.sh ./config/connect-avro-standalone.properties ./config/connect-file-source-oracle.properties
+
+./bin/connect-standalone.sh  ./config/connect-standalone.properties  ./config/connect-file-source-oracle.properties
+
+
+
+
+start kafka consumer
+
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic connect-test --from-beginning
+ ./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic connect-test --from-beginning --property print.key=true
+
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic connect-test  --property print.key=true --consumer-property group.id=sanjeev
+
+
+
+
+~/downloads/confluent-5.0.0
+./bin/kafka-avro-console-consumer--bootstrap-server localhost:9092 --topic connect-test --from-beginning
+
+
+stop kafka cluster
+ ./bin/kafka-server-stop.sh ./config/server1.properties
+ ./bin/kafka-server-stop.sh ./config/server2.properties
+ ./bin/kafka-server-stop.sh ./config/server3.properties
+
+
+common-config-5.0.0
+kafka-avro-serializer-5.0.0
+kafka-connect-avro-converter-5.0.0
+kafka-schema-registry-client-5.0.0
+org.apache.avro.io.DatumWriter avro-1.8.1  // schema-registry
+org.codehaus.jackson.JsonParseException — jackson-core-asl-1.9.13  in /kafka
+org.codehaus.jackson.node.TextNode - jackson-mapper-asl-1.9.13.jar
+
+
+Transforms - need to update the file connect-standalone.properties
+
+kafka topic messages retention settings
+
+./kafka-topics.sh --zookeeper zookeeper1:2181 --alter --topic yourtopicname --config retention.ms=604800000
+
+./kafka-topics.sh --zookeeper zookeeper1:2181 --alter --topic yourtopicname --config retention.ms=1000
+
+
+
+
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic testout --property print.key=true --consumer-property group.id=sanjeev
+
+
+./bin/kafka-streams-application-reset.sh --application-id  MyKafkaStreaTest
