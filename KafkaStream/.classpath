@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/kafka/share/java/kafka-connect-jdbc/kafka-connect-jdbc-5.0.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/kafka/share/java/kafka-connect-jdbc/common-utils-5.0.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/kafka/libs/jersey-common-2.25.1.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/kafka/libs/kafka-clients-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/kafka-streams-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/kafka-streams-examples-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/kafka-tools-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/kafka-streams-test-utils-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/kafka-log4j-appender-1.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/rocksdbjni-5.7.3.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/jackson-databind-2.9.4.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/jackson-jaxrs-base-2.9.4.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/jackson-jaxrs-json-provider-2.9.4.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/jackson-module-jaxb-annotations-2.9.4.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/jackson-core-2.9.4.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/kafka_2.11-1.1.0/libs/jackson-annotations-2.9.4.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/jar_files (1)/connect-api-1.0.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/connect-json-2.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/jar_files (1)/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/jar_files (1)/lz4-java-1.4.jar"/>
+	<classpathentry kind="lib" path="/Users/Sanjeev/Downloads/jar_files (1)/snappy-java-1.1.4.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
