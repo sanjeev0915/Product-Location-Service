@@ -1,11 +1,11 @@
 package jain.sanjeev.kafka;
 
-
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.ValueTransformer;
 
-
+import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.processor.ProcessorContext;
-
+import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.WindowStore;
 import org.apache.kafka.streams.state.WindowStoreIterator;
 
@@ -16,16 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-/*
- * This class will extends the ValueTransformer  to transform the input JSON Record (coming from Stream) to null if it is already been processed earlier
- * Transform method in this class will check the record's Key in a timed window cache of defined period (configurable). If Key is found in the cache this out record
- * is set to null and returned back. if key is not found in the cache it means the record came here first time, this record will be forwarded to the downstream processes
- * at it is and a entry will also be created in the cache. 
- * 
- * Kafka stream WindowStore is used as a cache
- */
-
-public class MyWindowTransformer implements ValueTransformer<JsonNode, JsonNode>{
+public class DeDupTransformer implements ValueTransformer<JsonNode, JsonNode>{
 	
 
 
@@ -34,7 +25,7 @@ public class MyWindowTransformer implements ValueTransformer<JsonNode, JsonNode>
     private ProcessorContext context;
     private static final Integer BACKINTIME = 10*60*1000;
 	
-    public MyWindowTransformer(String storeName) {
+    public DeDupTransformer(String storeName) {
         Objects.requireNonNull(storeName,"Store Name can't be null");
         this.storeName = storeName;
     }
@@ -51,14 +42,17 @@ public class MyWindowTransformer implements ValueTransformer<JsonNode, JsonNode>
     	
 		ObjectMapper om = new ObjectMapper();
 		JsonNode rootNode = null;
+		String mapData = null;
 		
-
+	
+	
+		System.out.println("in Transformer1");
 	
 		try {
 			
-			String recordValue = (String) value.toString();
+			 mapData = (String) value.toString();
 		
-			rootNode = 	om.readTree(recordValue);
+			rootNode = 	om.readTree(mapData);
 			
 			if (!rootNode.isNull()) {
 				System.out.println("in Transformer2: not null");
@@ -69,23 +63,63 @@ public class MyWindowTransformer implements ValueTransformer<JsonNode, JsonNode>
 				String userName = (String)userNode.asText();
 
 	
-
-				/****                     Search in window store  in last one minute    *****/
 				
+				/****                     Search in window store  in last one minute    *****/
+			 		
 				long currentTime = context.timestamp();
 				long from = currentTime - BACKINTIME/2; // setting the window segment starting time
 				long to = currentTime + BACKINTIME/2;	 // setting the window segment end time
 				
 				long diff = to-from;
-				
-				
 				System.out.println(new Date(from) + ", "+ new Date(to) + ", "  +diff);
+
+				
+				boolean entryFound=false;
+				
+		
+				
+				
+				KeyValueIterator iter = windowStore.all();
+			
+				while(iter.hasNext()) {
+					KeyValue kv = (KeyValue)iter.next();
+					
+					Windowed kw = (Windowed)kv.key;
+					System.out.println(kw.key());
+				//	System.out.println(kw.window().toString());
+					System.out.println("from: " + new Date(kw.window().start()) + ", to: " + new Date(kw.window().end()));
+					
+					
+					System.out.println(kv.key.toString() +", " + kv.value.toString());
+					
+				}
+				
+				
+				
+				WindowStoreIterator<String> iterator = windowStore.fetch(userName,from, to); // fetch with key in range from and to
 				System.out.println("searching " + userName + " in last 10 minutes");
+
 				
-				WindowStoreIterator<String> iterator = windowStore.fetch(userName,from, to); // fetch all records from window store with key in time range from and to
-				boolean entryFound = iterator.hasNext(); //  check if a record with exists in window store using iterator
+				entryFound = iterator.hasNext();
 				
-				if(!entryFound) { // if entry  not found in the defined time window, add the entry in window store
+		/*		while (iterator.hasNext()) {
+					System.out.println("found something in last 10 minute");
+					
+					KeyValue<Long, String> rec =  iterator.next(); // KeyValue is pair of (long, Value) where long is timestamp
+					
+					String stateStoreValue = (String)rec.value;
+					System.out.println(rec.key + ", "+rec.value);
+					if (stateStoreValue.equals(userName)) {
+						entryFound=true;
+						iterator.close();
+						break;
+					}
+				}*/
+				
+				/****                     Search in window store  in last one minute    *****/
+
+				
+				if(!entryFound) { // not found in the defined time window
 					
 
 					// get event-time from the record
@@ -97,14 +131,14 @@ public class MyWindowTransformer implements ValueTransformer<JsonNode, JsonNode>
 					
 					long datetime = d.getTime();
 					
-					
-					windowStore.put(userName,userName,datetime);        // adding a record in the window store - key, Value, eventTime,
+					// adding a record in the window store - key, Value, eventTime,
+					windowStore.put(userName,userName,datetime);
 					
 					System.out.println("in Transformer3: not in state store.ading it now: "+ userName + ", at " + new Date(datetime));
 					
 					return rootNode;
 		
-				}else { // if found in store, it means duplicate, so set the return record to null which will be filtered in next processing node. Kstream.filter
+				}else { // if found in store
 					
 					
 					System.out.println("in Transformer3: found in state store: " + userName);
@@ -116,7 +150,7 @@ public class MyWindowTransformer implements ValueTransformer<JsonNode, JsonNode>
 				}
 		
 			
-			}else // if rootNode == Null
+			}else
 			{
 				System.out.println("in Transformer2: null");
 			}
@@ -126,7 +160,8 @@ public class MyWindowTransformer implements ValueTransformer<JsonNode, JsonNode>
 		}
 		
 
-		return rootNode;
+return rootNode;
+       
 
     }
     

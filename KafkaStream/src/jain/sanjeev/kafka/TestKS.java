@@ -24,7 +24,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 
 
-
+/*
+ * This Program is the main Kafka Stream Program, which takes input records from a Kafka Topic then for each record it calls
+ * -- a custom Transformer (called using KStream.transformValues() --> This will set the input record to null if it is a duplicate and pass it to filter process
+ * -- a filter (called using KStream.Filter()) --> This filter the records whcih are set to null from the output of transformValues
+ * -- write to output topic
+ * 
+ * In the beginning as a setup - this program also adds a Window State Store to the Kafka Stream Topology which will be accessed in the transformValues function
+ * Window Size in this sample is 10 minutes and same is the retention period
+ */
 public class TestKS {
 
 	public static void main(String[] args) {
@@ -43,6 +51,8 @@ public class TestKS {
 		System.out.println("step1");
 		
 		StreamsBuilder builder = new StreamsBuilder();
+		
+		
 		/**** Creating a Window  State Store  of winodow size 1 minute (600000 milli seconds) and 5 minutes of retention ***********/
 		
 		/*
@@ -65,23 +75,26 @@ public class TestKS {
 		
 		
 		// this will read the messages from Kafka Topic connect-test
-		KStream<JsonNode, JsonNode> simpleFirstStream = 
-				builder.stream("connect-test",Consumed.with(jsonSerde, jsonSerde));
-	
-		System.out.println("step3");
-		
 		// Transforms the message to different message with updated values
+		KStream<JsonNode, JsonNode> simpleFirstStream = 
+				builder.stream("connect-test",Consumed.with(jsonSerde, jsonSerde))
+				.transformValues(()-> new MyWindowTransformer(winDupStateStoreName),winDupStateStoreName) // Transformer is called in this line using the class MyWindowTransformer
+				.filter(TestKafkaStream::filterRecord);// Records are filtered in this line
+	
+		
+/*		// Transforms the message to different message with updated values
 	
 		KStream<JsonNode, JsonNode> updateStream = simpleFirstStream
-				.transformValues(()-> new MyWindowTransformer(winDupStateStoreName),winDupStateStoreName)
-				.filter(TestKafkaStream::filterRecord);
-		
-		System.out.println("step4");
+				.transformValues(()-> new MyWindowTransformer(winDupStateStoreName),winDupStateStoreName) // Transformer is called in this line using the class MyWindowTransformer
+				.filter(TestKafkaStream::filterRecord); // Records are filtered in this line
+		*/
 		
 		// writing to output - topic
 		
-		updateStream.to( "testout",Produced.with(jsonSerde, jsonSerde));
-		System.out.println("step5");
+		simpleFirstStream.to( "testout",Produced.with(jsonSerde, jsonSerde)); // Writing to the output Topic - only filtered records
+		
+		
+		
 		
 		KafkaStreams kafkaStreams = new KafkaStreams(builder.build(),streamingConfig);
 		System.out.println("step6");
@@ -105,10 +118,16 @@ public class TestKS {
 		kafkaStreams.close();
 	}// end of main
 
+
+	/*
+	 * Filter Predicate/rule to call Kstream.filter()
+	 * This Rule will return the value true if input record is not null else return will false
+	 * So in a sense - filter function of Kstream filter out the null records and forwards non-null to downstream process
+	 */
 	
 	static boolean filterRecord(JsonNode k, JsonNode v) {
 		
-		System.out.println("in filter");
+
 		if (v != null) {
 			
 			System.out.println("in filter: returning true");
