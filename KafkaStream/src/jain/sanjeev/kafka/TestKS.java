@@ -40,6 +40,7 @@ public class TestKS {
 		props.put(StreamsConfig.APPLICATION_ID_CONFIG, "MyKafkaStreaTest ");
 		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 		props.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, CustomTimestampExtractor.class);
+	
 		
 	    final Serializer<JsonNode> jsonSerializer = new JsonSerializer();
 	    final Deserializer<JsonNode> jsonDeserializer = new JsonDeserializer();
@@ -91,7 +92,7 @@ public class TestKS {
 		
 		// writing to output - topic
 		
-		simpleFirstStream.to( "testout",Produced.with(jsonSerde, jsonSerde)); // Writing to the output Topic - only filtered records
+		simpleFirstStream.to( "testout",Produced.with(jsonSerde, jsonSerde, new MyPartitioner())); // Writing to the output Topic - only filtered records
 		
 		
 		
